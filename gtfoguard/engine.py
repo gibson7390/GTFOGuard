@@ -2,6 +2,7 @@ from gtfoguard.collectors.process import ProcessCollector
 from gtfoguard.detectors.gtfobins import GTFOBinsDetector
 from gtfoguard.detectors.cmdline import CommandLineDetector
 from gtfoguard.detectors.path import PathAnomalyDetector
+from gtfoguard.detectors.ancestry import AncestryDetector
 from gtfoguard.intelligence.scoring import RiskScorer
 from gtfoguard.models import DetectionResult, RiskScore
 
@@ -13,6 +14,7 @@ class Engine:
             GTFOBinsDetector(),
             CommandLineDetector(),
             PathAnomalyDetector(),
+            AncestryDetector(),
         ]
         self.scorer = RiskScorer()
 
