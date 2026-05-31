@@ -3,11 +3,6 @@ from gtfoguard.models import ProcessSnapshot, DetectionResult
 from gtfoguard.detectors.path_rules import TRUSTED_PREFIXES, SUSPICIOUS_PREFIXES
 
 
-def _has_hidden_segment(path: str) -> bool:
-    return any(segment.startswith(".") and segment not in (".", "..")
-              for segment in path.split("/"))
-
-
 class PathAnomalyDetector:
     def detect(self, snapshots: list[ProcessSnapshot]) -> list[DetectionResult]:
         results = []
