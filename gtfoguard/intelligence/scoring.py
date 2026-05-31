@@ -88,6 +88,14 @@ class RiskScorer:
                 f"Executable runs from suspicious location '{location}' — a world-writable path commonly used to stage malware",
             )
 
+        if detection.detection_type == "ancestry_anomaly":
+            relationship = detection.matched_name
+            return (
+                "HIGH",
+                8,
+                f"Suspicious process ancestry '{relationship}' — a service or daemon spawning this child is a common post-exploitation pattern",
+            )
+
         return (
             "LOW",
             2,

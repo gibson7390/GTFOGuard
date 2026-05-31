@@ -1,0 +1,107 @@
+Implement RiskScorer support for ancestry_anomaly detections.
+
+Context:
+
+The AncestryDetector phase is complete and validated.
+
+Integration testing revealed that ancestry_anomaly detections currently fall through RiskScorer's default unknown-type branch.
+
+Current behavior:
+
+[LOW] score=2 ancestry_anomaly
+reason: Unknown detection type 'ancestry_anomaly'
+
+This is not an AncestryDetector issue.
+
+The detector correctly identifies suspicious parent-child relationships and emits DetectionResult objects.
+
+The gap is that RiskScorer has no explicit scoring rule for detection_type="ancestry_anomaly".
+
+Goal:
+
+Extend RiskScorer so ancestry_anomaly detections receive intentional severity, score, and explanation.
+
+Requirements:
+
+1. Modify only RiskScorer.
+2. Do not modify AncestryDetector.
+3. Do not modify Engine.
+4. Do not modify existing detector behavior.
+5. Preserve existing GTFOBins scoring.
+6. Preserve existing command-line scoring.
+7. Preserve existing path_anomaly scoring.
+8. Maintain separation of concerns.
+
+Architecture constraints:
+
+GOOD:
+
+if detection.detection_type == "ancestry_anomaly":
+    ...
+
+BAD:
+
+if detection.snapshot.name == "apache2":
+if detection.snapshot.name == "nginx":
+if detection.snapshot.name == "cron":
+
+RiskScorer must trust detector output.
+
+The detector has already determined the parent-child relationship is suspicious.
+
+RiskScorer should score detector findings, not reimplement ancestry logic.
+
+Scoring requirements:
+
+- Add explicit support for detection_type="ancestry_anomaly".
+- Assign severity.
+- Assign numeric score.
+- Assign human-readable explanation.
+- Remove unknown-type fallback behavior for ancestry_anomaly.
+
+Validation requirements:
+
+Validate:
+
+1. GTFOBins detections still score correctly.
+2. Command-line detections still score correctly.
+3. path_anomaly detections still score correctly.
+4. ancestry_anomaly no longer enters unknown-type branch.
+5. Synthetic ancestry_anomaly detections receive expected severity and score.
+6. Full Engine execution still works.
+
+Show:
+
+- Detector output before scoring.
+- RiskScorer output after scoring.
+- Exact console output.
+- Severity assigned.
+- Explanation assigned.
+
+Code style requirements:
+
+- Production-quality Python.
+- Small focused change.
+- No detector logic inside scorer.
+- No AI-style comments.
+- No architecture drift.
+
+Restrictions:
+
+- No NetworkDetector.
+- No Correlation Engine.
+- No monitoring loop.
+- No detector rewrites.
+- No scoring redesign.
+- No commits.
+- No pushes.
+
+Deliver:
+
+1. Architecture summary
+2. Files modified
+3. Validation results
+4. Exact console output
+5. Any discovered tradeoffs
+
+Implement only ancestry_anomaly scoring support.
