@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+from __future__ import annotations
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -11,3 +12,11 @@ class ProcessSnapshot:
     username: str
     create_time: float
     status: str
+
+
+@dataclass(frozen=True)
+class DetectionResult:
+    snapshot: ProcessSnapshot
+    matched_name: str
+    detection_type: str
+    timestamp: float
