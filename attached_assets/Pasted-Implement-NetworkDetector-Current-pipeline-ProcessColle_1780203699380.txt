@@ -1,0 +1,102 @@
+Implement NetworkDetector.
+
+Current pipeline:
+
+ProcessCollector
+→ GTFOBinsDetector
+→ CommandLineDetector
+→ PathAnomalyDetector
+→ AncestryDetector
+→ RiskScorer
+→ Rich UI
+
+Goal:
+
+Add detection of suspicious network-connected processes.
+
+Requirements:
+
+1. Create a dedicated NetworkDetector.
+2. Follow the exact detector architecture used by existing detectors.
+3. Detector emits DetectionResult objects only.
+4. Detector performs detection only.
+5. Detector performs zero scoring.
+6. Detector performs zero display logic.
+7. Detector must integrate into Engine as the next detector after AncestryDetector.
+
+Architecture requirements:
+
+GOOD:
+
+ProcessSnapshot
+→ NetworkDetector
+→ DetectionResult
+→ Engine
+→ RiskScorer
+
+BAD:
+
+NetworkDetector assigning severity
+NetworkDetector assigning score
+NetworkDetector rendering output
+
+Detection strategy:
+
+Use process network information available from psutil.
+
+Detect processes that currently have active network connections.
+
+Focus on suspicious executable names already commonly associated with post-exploitation activity.
+
+Examples:
+
+nc
+netcat
+ncat
+socat
+python
+python3
+perl
+ruby
+bash
+sh
+
+Detector output requirements:
+
+DetectionResult fields must follow existing architecture.
+
+Use a dedicated detection_type:
+
+network_activity
+
+Store matched executable information in the same style used by existing detectors.
+
+Validation requirements:
+
+1. Synthetic network-connected suspicious process cases.
+2. Benign network-connected processes.
+3. Real collection validation.
+4. Full Engine execution validation.
+5. Verify Engine ordering.
+6. Verify detections reach RiskScorer.
+
+Restrictions:
+
+- No scoring changes.
+- No RiskScorer modifications.
+- No UI modifications.
+- No correlation engine.
+- No monitoring loop.
+- No detector rewrites.
+- No commits.
+- No pushes.
+
+Deliver:
+
+1. Architecture summary
+2. Files created/modified
+3. Validation results
+4. Exact console output
+5. Tradeoffs discovered
+
+Implement only NetworkDetector.
