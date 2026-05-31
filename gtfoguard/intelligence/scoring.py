@@ -1,3 +1,4 @@
+from typing import Callable
 from gtfoguard.models import DetectionResult, DetectionType, RiskScore
 
 
@@ -28,12 +29,69 @@ _MEDIUM_CMDLINE_PATTERNS: set[str] = {
     "openssl",
 }
 
-_SEVERITY_MAP: dict[DetectionType, tuple[str, int, str]] = {
-    DetectionType.GTFOBINS_NAME_MATCH: (
+
+def _score_gtfobins(detection: DetectionResult) -> tuple[str, int, str]:
+    return (
         "LOW",
         3,
         "Binary name matches GTFOBins catalog — no suspicious arguments confirmed",
-    ),
+    )
+
+
+def _score_cmdline(detection: DetectionResult) -> tuple[str, int, str]:
+    pattern = detection.matched_name
+    if pattern in _HIGH_CMDLINE_PATTERNS:
+        return (
+            "HIGH",
+            8,
+            f"Command-line pattern '{pattern}' is a known GTFOBins shell escape or code execution technique",
+        )
+    if pattern in _MEDIUM_CMDLINE_PATTERNS:
+        return (
+            "MEDIUM",
+            5,
+            f"Command-line pattern '{pattern}' can be used for privilege escalation or file access",
+        )
+    return (
+        "MEDIUM",
+        5,
+        f"Command-line pattern '{pattern}' matched a suspicious execution pattern",
+    )
+
+
+def _score_path_anomaly(detection: DetectionResult) -> tuple[str, int, str]:
+    location = detection.matched_name
+    return (
+        "MEDIUM",
+        6,
+        f"Executable runs from suspicious location '{location}' — a world-writable path commonly used to stage malware",
+    )
+
+
+def _score_ancestry(detection: DetectionResult) -> tuple[str, int, str]:
+    relationship = detection.matched_name
+    return (
+        "HIGH",
+        8,
+        f"Suspicious process ancestry '{relationship}' — a service or daemon spawning this child is a common post-exploitation pattern",
+    )
+
+
+def _score_network(detection: DetectionResult) -> tuple[str, int, str]:
+    name = detection.matched_name
+    return (
+        "MEDIUM",
+        5,
+        f"Suspicious executable '{name}' currently has an active network connection",
+    )
+
+
+_SEVERITY_MAP: dict[DetectionType, Callable[[DetectionResult], tuple[str, int, str]]] = {
+    DetectionType.GTFOBINS_NAME_MATCH: _score_gtfobins,
+    DetectionType.CMDLINE_PATTERN_MATCH: _score_cmdline,
+    DetectionType.PATH_ANOMALY: _score_path_anomaly,
+    DetectionType.ANCESTRY_ANOMALY: _score_ancestry,
+    DetectionType.NETWORK_ACTIVITY: _score_network,
 }
 
 
@@ -53,59 +111,11 @@ class RiskScorer:
         return results
 
     def _evaluate(self, detection: DetectionResult) -> tuple[str, int, str]:
-        if detection.detection_type == DetectionType.GTFOBINS_NAME_MATCH:
+        handler = _SEVERITY_MAP.get(detection.detection_type)
+        if handler is None:
             return (
                 "LOW",
-                3,
-                "Binary name matches GTFOBins catalog — no suspicious arguments confirmed",
+                2,
+                f"Unknown detection type '{detection.detection_type}'",
             )
-
-        if detection.detection_type == DetectionType.CMDLINE_PATTERN_MATCH:
-            pattern = detection.matched_name
-            if pattern in _HIGH_CMDLINE_PATTERNS:
-                return (
-                    "HIGH",
-                    8,
-                    f"Command-line pattern '{pattern}' is a known GTFOBins shell escape or code execution technique",
-                )
-            if pattern in _MEDIUM_CMDLINE_PATTERNS:
-                return (
-                    "MEDIUM",
-                    5,
-                    f"Command-line pattern '{pattern}' can be used for privilege escalation or file access",
-                )
-            return (
-                "MEDIUM",
-                5,
-                f"Command-line pattern '{pattern}' matched a suspicious execution pattern",
-            )
-
-        if detection.detection_type == DetectionType.PATH_ANOMALY:
-            location = detection.matched_name
-            return (
-                "MEDIUM",
-                6,
-                f"Executable runs from suspicious location '{location}' — a world-writable path commonly used to stage malware",
-            )
-
-        if detection.detection_type == DetectionType.ANCESTRY_ANOMALY:
-            relationship = detection.matched_name
-            return (
-                "HIGH",
-                8,
-                f"Suspicious process ancestry '{relationship}' — a service or daemon spawning this child is a common post-exploitation pattern",
-            )
-
-        if detection.detection_type == DetectionType.NETWORK_ACTIVITY:
-            name = detection.matched_name
-            return (
-                "MEDIUM",
-                5,
-                f"Suspicious executable '{name}' currently has an active network connection",
-            )
-
-        return (
-            "LOW",
-            2,
-            f"Unknown detection type '{detection.detection_type}'",
-        )
+        return handler(detection)
