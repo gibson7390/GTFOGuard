@@ -3,3 +3,4 @@ rich>=13.0
 requests>=2.0
 pydantic>=2.0
 pyfiglet>=0.8
+pytest
