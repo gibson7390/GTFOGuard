@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import Protocol, runtime_checkable
 
 
 class DetectionType(StrEnum):
@@ -37,3 +38,9 @@ class RiskScore:
     severity: str
     score: int
     reason: str
+
+
+@runtime_checkable
+class Detector(Protocol):
+    def detect(self, snapshots: list[ProcessSnapshot]) -> list[DetectionResult]:
+        ...

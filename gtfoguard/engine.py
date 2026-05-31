@@ -5,13 +5,13 @@ from gtfoguard.detectors.path import PathAnomalyDetector
 from gtfoguard.detectors.ancestry import AncestryDetector
 from gtfoguard.detectors.network import NetworkDetector
 from gtfoguard.intelligence.scoring import RiskScorer
-from gtfoguard.models import DetectionResult, RiskScore
+from gtfoguard.models import DetectionResult, RiskScore, Detector
 
 
 class Engine:
     def __init__(self) -> None:
         self.collector = ProcessCollector()
-        self.detectors = [
+        self.detectors: list[Detector] = [
             GTFOBinsDetector(),
             CommandLineDetector(),
             PathAnomalyDetector(),
