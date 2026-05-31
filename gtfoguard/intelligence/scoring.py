@@ -80,6 +80,14 @@ class RiskScorer:
                 f"Command-line pattern '{pattern}' matched a suspicious execution pattern",
             )
 
+        if detection.detection_type == "path_anomaly":
+            location = detection.matched_name
+            return (
+                "MEDIUM",
+                6,
+                f"Executable runs from suspicious location '{location}' — a world-writable path commonly used to stage malware",
+            )
+
         return (
             "LOW",
             2,
