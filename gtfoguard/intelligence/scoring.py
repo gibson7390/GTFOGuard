@@ -1,4 +1,4 @@
-from gtfoguard.models import DetectionResult, RiskScore
+from gtfoguard.models import DetectionResult, DetectionType, RiskScore
 
 
 _HIGH_CMDLINE_PATTERNS: set[str] = {
@@ -28,8 +28,8 @@ _MEDIUM_CMDLINE_PATTERNS: set[str] = {
     "openssl",
 }
 
-_SEVERITY_MAP: dict[str, tuple[str, int, str]] = {
-    "gtfobins_name_match": (
+_SEVERITY_MAP: dict[DetectionType, tuple[str, int, str]] = {
+    DetectionType.GTFOBINS_NAME_MATCH: (
         "LOW",
         3,
         "Binary name matches GTFOBins catalog — no suspicious arguments confirmed",
@@ -53,14 +53,14 @@ class RiskScorer:
         return results
 
     def _evaluate(self, detection: DetectionResult) -> tuple[str, int, str]:
-        if detection.detection_type == "gtfobins_name_match":
+        if detection.detection_type == DetectionType.GTFOBINS_NAME_MATCH:
             return (
                 "LOW",
                 3,
                 "Binary name matches GTFOBins catalog — no suspicious arguments confirmed",
             )
 
-        if detection.detection_type == "cmdline_pattern_match":
+        if detection.detection_type == DetectionType.CMDLINE_PATTERN_MATCH:
             pattern = detection.matched_name
             if pattern in _HIGH_CMDLINE_PATTERNS:
                 return (
@@ -80,7 +80,7 @@ class RiskScorer:
                 f"Command-line pattern '{pattern}' matched a suspicious execution pattern",
             )
 
-        if detection.detection_type == "path_anomaly":
+        if detection.detection_type == DetectionType.PATH_ANOMALY:
             location = detection.matched_name
             return (
                 "MEDIUM",
@@ -88,7 +88,7 @@ class RiskScorer:
                 f"Executable runs from suspicious location '{location}' — a world-writable path commonly used to stage malware",
             )
 
-        if detection.detection_type == "ancestry_anomaly":
+        if detection.detection_type == DetectionType.ANCESTRY_ANOMALY:
             relationship = detection.matched_name
             return (
                 "HIGH",
@@ -96,7 +96,7 @@ class RiskScorer:
                 f"Suspicious process ancestry '{relationship}' — a service or daemon spawning this child is a common post-exploitation pattern",
             )
 
-        if detection.detection_type == "network_activity":
+        if detection.detection_type == DetectionType.NETWORK_ACTIVITY:
             name = detection.matched_name
             return (
                 "MEDIUM",

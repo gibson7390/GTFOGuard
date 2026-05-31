@@ -1,6 +1,6 @@
 import time
 import psutil
-from gtfoguard.models import ProcessSnapshot, DetectionResult
+from gtfoguard.models import ProcessSnapshot, DetectionResult, DetectionType
 from gtfoguard.detectors.network_rules import NETWORK_SUSPICIOUS_NAMES
 
 
@@ -29,7 +29,7 @@ class NetworkDetector:
                     DetectionResult(
                         snapshot=snapshot,
                         matched_name=snapshot.name,
-                        detection_type="network_activity",
+                        detection_type=DetectionType.NETWORK_ACTIVITY,
                         timestamp=detection_time,
                     )
                 )

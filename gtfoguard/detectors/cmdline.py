@@ -1,5 +1,5 @@
 import time
-from gtfoguard.models import ProcessSnapshot, DetectionResult
+from gtfoguard.models import ProcessSnapshot, DetectionResult, DetectionType
 
 
 _PATTERNS: list[tuple[str, set[str], list[str]]] = [
@@ -49,7 +49,7 @@ class CommandLineDetector:
                         DetectionResult(
                             snapshot=snapshot,
                             matched_name=pattern_label,
-                            detection_type="cmdline_pattern_match",
+                            detection_type=DetectionType.CMDLINE_PATTERN_MATCH,
                             timestamp=detection_time,
                         )
                     )

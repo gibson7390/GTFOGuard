@@ -1,5 +1,5 @@
 import time
-from gtfoguard.models import ProcessSnapshot, DetectionResult
+from gtfoguard.models import ProcessSnapshot, DetectionResult, DetectionType
 from gtfoguard.detectors.path_rules import TRUSTED_PREFIXES, SUSPICIOUS_PREFIXES
 
 
@@ -19,7 +19,7 @@ class PathAnomalyDetector:
                         DetectionResult(
                             snapshot=snapshot,
                             matched_name=prefix,
-                            detection_type="path_anomaly",
+                            detection_type=DetectionType.PATH_ANOMALY,
                             timestamp=detection_time,
                         )
                     )

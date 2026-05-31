@@ -1,5 +1,5 @@
 import time
-from gtfoguard.models import ProcessSnapshot, DetectionResult
+from gtfoguard.models import ProcessSnapshot, DetectionResult, DetectionType
 from gtfoguard.detectors.ancestry_rules import SUSPICIOUS_PARENT_CHILD
 
 
@@ -18,7 +18,7 @@ class AncestryDetector:
                     DetectionResult(
                         snapshot=snapshot,
                         matched_name=f"{parent_name} -> {snapshot.name}",
-                        detection_type="ancestry_anomaly",
+                        detection_type=DetectionType.ANCESTRY_ANOMALY,
                         timestamp=detection_time,
                     )
                 )

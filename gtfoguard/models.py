@@ -1,5 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from enum import StrEnum
+
+
+class DetectionType(StrEnum):
+    GTFOBINS_NAME_MATCH = "gtfobins_name_match"
+    CMDLINE_PATTERN_MATCH = "cmdline_pattern_match"
+    PATH_ANOMALY = "path_anomaly"
+    ANCESTRY_ANOMALY = "ancestry_anomaly"
+    NETWORK_ACTIVITY = "network_activity"
 
 
 @dataclass(frozen=True)
@@ -18,7 +27,7 @@ class ProcessSnapshot:
 class DetectionResult:
     snapshot: ProcessSnapshot
     matched_name: str
-    detection_type: str
+    detection_type: DetectionType
     timestamp: float
 
 
