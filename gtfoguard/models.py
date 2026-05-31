@@ -20,3 +20,11 @@ class DetectionResult:
     matched_name: str
     detection_type: str
     timestamp: float
+
+
+@dataclass(frozen=True)
+class RiskScore:
+    detection: DetectionResult
+    severity: str
+    score: int
+    reason: str
