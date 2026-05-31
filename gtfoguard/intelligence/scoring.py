@@ -96,6 +96,14 @@ class RiskScorer:
                 f"Suspicious process ancestry '{relationship}' — a service or daemon spawning this child is a common post-exploitation pattern",
             )
 
+        if detection.detection_type == "network_activity":
+            name = detection.matched_name
+            return (
+                "MEDIUM",
+                5,
+                f"Suspicious executable '{name}' currently has an active network connection",
+            )
+
         return (
             "LOW",
             2,
