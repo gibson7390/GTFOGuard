@@ -1,0 +1,139 @@
+Implement the Orchestrator phase for GTFOGuard.
+
+Current architecture:
+
+- ProcessCollector
+- GTFOBinsDetector
+- CommandLineDetector
+- PathAnomalyDetector
+- RiskScorer
+
+Goal:
+
+Create the first end-to-end execution pipeline that turns the existing components into a working application.
+
+Requirements:
+
+1. The Orchestrator must be a coordinator only.
+2. The Orchestrator must NOT contain any detection logic.
+3. All detection logic remains inside detector modules.
+4. All scoring logic remains inside RiskScorer.
+5. Maintain strict separation of concerns throughout the implementation.
+
+Desired execution flow:
+
+ProcessCollector
+→ GTFOBinsDetector
+→ CommandLineDetector
+→ PathAnomalyDetector
+→ Merge detections
+→ RiskScorer
+→ Final scored results
+
+Implementation requirements:
+
+- Create the smallest orchestration layer that cleanly wires the existing components together.
+- Reuse existing components exactly as implemented.
+- Call ProcessCollector.collect() exactly once.
+- Pass the resulting snapshots to each detector.
+- Execute detectors in a fixed deterministic order.
+- Merge all DetectionResult lists.
+- Pass merged detections through RiskScorer.
+- Return the final scored detections.
+
+Architecture constraints:
+
+GOOD:
+
+detections.extend(gtfobins.detect(snapshots))
+detections.extend(cmdline.detect(snapshots))
+detections.extend(path.detect(snapshots))
+
+BAD:
+
+if process.name == "python":
+if process.exe.startswith("/tmp"):
+if "-exec" in cmdline:
+
+The orchestrator must never inspect process data directly.
+
+Additional constraints:
+
+- The orchestrator must be deterministic.
+- The orchestrator must not perform detector arbitration.
+- The orchestrator must not perform correlation.
+- The orchestrator must not perform confidence analysis.
+- The orchestrator must not modify DetectionResult objects.
+- The orchestrator must not mutate detector output.
+- The orchestrator must not contain security heuristics.
+- The orchestrator must act strictly as a pipeline coordinator.
+
+Detector execution order:
+
+1. GTFOBinsDetector
+2. CommandLineDetector
+3. PathAnomalyDetector
+
+RiskScorer executes only after all detector outputs are merged.
+
+Do not introduce:
+
+- Route scoring
+- Confidence arbitration
+- Detection correlation
+- Multi-pass analysis
+- Plugin systems
+- Event buses
+- Registries
+- Abstract base classes
+- Framework-style architecture
+- Dependency injection containers
+- Factory layers
+- Observer patterns
+
+Keep the implementation as simple as possible while preserving clean separation of concerns.
+
+Validation requirements:
+
+- Validate with real process collection.
+- Validate with controlled synthetic detections.
+- Demonstrate every detector contributes correctly.
+- Demonstrate RiskScorer still works after orchestration.
+- Show exact validation output.
+- Show detector counts before scoring.
+- Show scored output after RiskScorer.
+- Verify detector ordering matches the approved design.
+
+Code style requirements:
+
+- Production-quality Python.
+- Prefer self-explanatory names over explanatory comments.
+- Avoid placeholder comments.
+- Avoid AI-style banner comments.
+- Avoid comments that restate obvious code behavior.
+- Use comments only when explaining non-obvious security reasoning.
+- Keep files focused and small.
+- Favor readability over cleverness.
+- Repository should look like it was written by experienced engineers.
+
+Restrictions:
+
+- No UI yet.
+- No ancestry detector.
+- No network detector.
+- No correlation engine.
+- No continuous monitoring loop.
+- No detector rewrites unless strictly required.
+- No detector behavior changes.
+- No commits.
+- No pushes.
+
+Deliver:
+
+1. Architecture summary
+2. Files created/modified
+3. Validation results
+4. Exact console output
+5. Any discovered tradeoffs
+
+Implement only the Orchestrator phase.
